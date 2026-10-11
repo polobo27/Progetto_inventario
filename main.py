@@ -34,7 +34,7 @@ class MenuPrincipale:
 
     def stampa_separatore(self):
         """Stampa una linea di separazione"""
-        print('-' * 60)
+        print('-' * 82)
     def input_valido(self, prompt, tipo=str, valori_validi=None):
         """Chiede input all'utente con validazione"""
         while True:
@@ -66,8 +66,9 @@ class MenuPrincipale:
             print('3. Visualizza Inventario')
             print('4. Ricerca Prodotto')
             print('5. Report e Statistiche')
-            print('6. Esci')
-            scelta = self.input_valido('Scelta: ', str, ['1', '2', '3', '4', '5', '6'])
+            print('6. Storico Movimenti')
+            print('7. Esci')
+            scelta = self.input_valido('Scelta: ', str, ['1', '2', '3', '4', '5', '6', '7'])
             if scelta == '1':
                 self.menu_gestione_prodotti()
             elif scelta == '2':
@@ -79,6 +80,8 @@ class MenuPrincipale:
             elif scelta == '5':
                 self.menu_report_e_statistiche()
             elif scelta == '6':
+                self.menu_storico_movimenti()
+            elif scelta == '7':
                 self.menu_esci()
     def menu_gestione_prodotti(self):
         """Mostra il menu per gestire i prodotti"""
@@ -116,15 +119,14 @@ class MenuPrincipale:
         if not prodotti:
             print('Nessun prodotto trovato')
         else:
-            print('\n{:<5} {:<30} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' )) 
+            print('\n{:<5} {:<20} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' )) 
             self.stampa_separatore()
             for id, nome, categoria, quantita, prezzo, data in prodotti:
-                print('\n{:<5} {:<30} {:<15} {:<10} {:<10.2f} {:<20}'.format(id, nome[:29], categoria[:14], quantita, prezzo, data[:19]))  
+                print('{:<5} {:<20} {:<15} {:<10} {:<10.2f} {:<20}'.format(id, nome[:19], categoria[:14], quantita, prezzo, data[:19]))  
             input('\nPremere INVIO per continuare...')  
     def modifica_prodotto(self):
         """Modifica un prodotto esistente"""
         self.stampa_header('MODIFICA PRODOTTO')
-        prodotti = self.inventario.visualizza_tutti_prodotti()
         prodotto_id = self.input_valido('ID prodotto da modificare: ', int)
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto:
@@ -138,10 +140,10 @@ class MenuPrincipale:
             prezzo_input = input('Nuovo prezzo: ').strip()
             nuovo_prezzo = float(prezzo_input) if prezzo_input else None
             self.inventario.modifica_prodotto(prodotto_id, nuovo_nome, nuova_categoria, nuovo_prezzo)
+            input('\nPremere INVIO per continuare...')
     def elimina_prodotto(self):
         """Elimina un prodotto dal database"""
         self.stampa_header('ELIMINA PRODOTTO')
-        prodotti = self.inventario.visualizza_tutti_prodotti()
         prodotto_id = self.input_valido('ID prodotto da eliminare: ', int)
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto: 
@@ -160,7 +162,6 @@ class MenuPrincipale:
     def menu_registra_movimento(self):
         """Registra i movimenti (entrata/uscita) dei prodotti""" 
         self.stampa_header('REGISTRA MOVIMENTO')
-        prodotti = self.inventario.visualizza_tutti_prodotti()
         prodotto_id = self.input_valido('ID prodotto: ', int)
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto: 
@@ -168,7 +169,6 @@ class MenuPrincipale:
             return 
         else: 
             print(f'\nProdotto selezionato: {prodotto[1]}')
-            print('(Lascia vuoto per non registrare movimenti)')
             tipo_movimento = self.input_valido('Tipo movimento (ENTRATA/USCITA): ', str, ['ENTRATA', 'USCITA'])
             quantita = self.input_valido('Quanti pezzi da movimentare: ', int)
             note = input('Note (opzionale): ').strip() or None
@@ -193,9 +193,9 @@ class MenuPrincipale:
                 input('\nPremere INVIO per continuare...')
                 continue
             else: 
-                print('\n{:<5} {:<30} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' ))
+                print('\n{:<5} {:<20} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' ))
                 self.stampa_separatore()
-                print('\n{:<5} {:<30} {:<15} {:<10} {:<10.2f} {:<20}'.format(prodotto[0], prodotto[1][:29], prodotto[2][:14], prodotto[3], prodotto[4], prodotto[5][:19]))
+                print('\n{:<5} {:<20} {:<15} {:<10} {:<10.2f} {:<20}'.format(prodotto[0], prodotto[1][:19], prodotto[2][:14], prodotto[3], prodotto[4], prodotto[5][:19]))
                 input('\nPremere INVIO per continuare...')
                 break
     def menu_report_e_statistiche(self):
@@ -212,19 +212,58 @@ class MenuPrincipale:
             print(f'Quantità totale: {quantita_totale} pezzi')
             print(f'Valore totale inventario: € {valore_totale:.2f}')
             input('\nPremere INVIO per continuare...')
+    def menu_storico_movimenti(self):
+        """Mostra lo storico dei movimenti"""
+        self.stampa_header('STORICO MOVIMENTI')
+        while True:
+            print('\n1. Visualizza tutti i movimenti')
+            print('2. Visualizza movimenti per prodotto')
+            print('3. Torna indietro ')
+            scelta = self.input_valido('Scelta: ', str, ['1', '2', '3'])
+            if scelta == '1':
+                self.visualizza_tutti_movimenti()
+            elif scelta == '2':
+                self.visualizza_movimenti_per_prodotto()
+            elif scelta == '3':
+                break
+    def visualizza_tutti_movimenti(self):
+        """Visualizza tutti i movimenti"""
+        self.stampa_header('MOVIMENTI')
+        movimenti = self.inventario.visualizza_tutti_movimenti()
+        if not movimenti:
+            print('Nessun movimento trovato')
+        else:
+            print("\n{:<12} {:<20} {:<12} {:<10} {:<20} {:<30}".format('Prodotto_ID', 'Nome', 'Tipo', 'Quantità', 'Data', 'Note'))
+            self.stampa_separatore()
+            for prodotto_id, nome, tipo, quantita, data, note in movimenti:
+                    print("{:<12} {:<20} {:<12} {:<10} {:<20} {:<30}".format(prodotto_id, nome, tipo, quantita, data[:19], (note or "")[:29]))
+            input('\nPremi INVIO per continuare...')
+    def visualizza_movimenti_per_prodotto(self):
+        """Visualizza i movimenti di un prodotto"""
+        self.stampa_header('MOVIMENTI DI UN PRODOTTO')
+        prodotto_id = self.input_valido('ID prodotto: ', int)
+        movimenti = self.inventario.visualizza_movimenti_per_prodotto(prodotto_id)
+        if not movimenti:
+            print('Nessun movimento trovato')
+        else:
+            print("\n{:<20} {:<12} {:<10} {:<20} {:<30}".format('Nome', 'Tipo', 'Quantità', 'Data', 'Note'))
+            self.stampa_separatore()
+            for nome, tipo, quantita, data, note in movimenti:
+                    print("{:<20} {:<12} {:<10} {:<20} {:<30}".format(nome[:19], tipo, quantita, data[:19], (note or "")[:29]))
+            input('\nPremi INVIO per continuare...')
     def menu_esci(self):
         """Arresta il programma e torna al sistema operativo"""
         self.running = False
-        print('\n Arrivederci!')
+        self.shutdown()
     def _visualizza_tabella_prodotti(self, prodotti):
         """Versione interna: stampa solo la tabella senza header"""
         if not prodotti:
             print('Nessun prodotto trovato')
         else:
-            print('\n{:<5} {:<30} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' )) 
+            print('\n{:<5} {:<20} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' )) 
             self.stampa_separatore()
             for id, nome, categoria, quantita, prezzo, data in prodotti:
-                print('{:<5} {:<30} {:<15} {:<10} {:<10.2f} {:<20}'.format(id, nome[:29], categoria[:14], quantita, prezzo, data[:19])) 
+                print('{:<5} {:<20} {:<15} {:<10} {:<10.2f} {:<20}'.format(id, nome[:19], categoria[:14], quantita, prezzo, data[:19])) 
 def main():
     """Funzione principale"""
     menu = MenuPrincipale()
@@ -232,5 +271,4 @@ def main():
     menu.menu_principale()
 
 if __name__ == '__main__':
-    main()       
-        
+    main()           

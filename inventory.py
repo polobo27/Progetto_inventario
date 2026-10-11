@@ -2,6 +2,7 @@
 inventory.py
 Classe principale per la gestione della logica di business
 """
+
 from database import Database
 
 class Inventario:
@@ -31,18 +32,39 @@ class Inventario:
     def visualizza_tutti_prodotti(self):
         """Visualizza tutti i prodotti del database"""
         query = """
-            SELECT id, nome, categoria, quantita, prezzo, data_inserimento
-            FROM prodotti
-            ORDER BY categoria, nome
+            SELECT p.id, p.nome, p.categoria, p.quantita, p.prezzo, p.data_inserimento
+            FROM prodotti p
+            ORDER BY p.id
+            """
+        return self.db.execute_query(query)
+    
+    def visualizza_movimenti_per_prodotto(self, prodotto_id):
+        """Visualizza i movimenti per un prodotto specifico"""
+        query = """
+            SELECT p.nome, m.tipo, m.quantita, m.data_movimento, m.note
+            FROM movimenti m
+            JOIN prodotti p ON m.prodotto_id = p.id
+            WHERE m.prodotto_id = ?
+            ORDER BY m.data_movimento ASC
+            """
+        return self.db.execute_query(query, (prodotto_id,))
+    
+    def visualizza_tutti_movimenti(self):
+        """Visualizza i movimenti di tutti i prodotti"""
+        query = """
+            SELECT m.prodotto_id, p.nome, m.tipo, m.quantita, m.data_movimento, m.note
+            FROM movimenti m
+            JOIN prodotti p ON m.prodotto_id = p.id
+            ORDER BY m.data_movimento ASC
             """
         return self.db.execute_query(query)
 
     def get_prodotto_per_id(self, prodotto_id):
         """Ottiene un prodotto per il suo ID"""
         query = """
-            SELECT id, nome, categoria, quantita, prezzo, data_inserimento
-            FROM prodotti   
-            WHERE id = ?
+            SELECT p.id ,p.nome, p.categoria, p.quantita, p.prezzo, p.data_inserimento
+            FROM prodotti p  
+            WHERE p.id = ?
             """
         return self.db.execute_query_one(query, (prodotto_id,))
 
@@ -70,6 +92,34 @@ class Inventario:
         else:
             print('Errore nella modifica del prodotto')
         return success
+    
+    def registra_movimento(self, prodotto_id, tipo, quantita, note):
+        """Registra un movimento ENTRATA/USCITA"""
+        prodotto = self.get_prodotto_per_id(prodotto_id)
+        if not prodotto:
+            print('Prodotto non trovato')
+            return False
+        elif tipo == 'USCITA' and quantita > prodotto[3]:
+            print(f'Giacenza insufficiente: disponibili {prodotto[3]} pezzi')
+            return False
+        else: 
+            query = """
+                INSERT INTO movimenti (prodotto_id, tipo, quantita, note)
+                VALUES (?,?,?,?)
+                """
+            success = self.db.execute_update(query, (prodotto_id, tipo, quantita, note))
+            if success: 
+                if tipo == 'ENTRATA':
+                    nuova_quantita = prodotto[3] + quantita
+                else:
+                    nuova_quantita = prodotto[3] - quantita
+                query_update = "UPDATE prodotti SET quantita = ? WHERE id = ?"
+                self.db.execute_update(query_update, (nuova_quantita, prodotto_id))
+                print('Movimento registrato con successo!')
+                return True
+            else:
+                print('Errore nel registro del movimento')
+                return False
     def elimina_prodotto(self, prodotto_id):
         """Elimina un prodotto dal database"""
         query_check = """

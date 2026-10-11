@@ -3,8 +3,6 @@ database.py
 Gestione della connessione SQLite e operazioni base
 """
 import sqlite3
-from sys import exec_prefix
-from unittest import expectedFailure
 class Database:
     """Classe per gestire la connessione al database SQLite"""
     def __init__(self, db_name='inventario.db'):
