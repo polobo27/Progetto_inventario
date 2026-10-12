@@ -118,6 +118,7 @@ class MenuPrincipale:
         prodotti = self.inventario.visualizza_tutti_prodotti()
         if not prodotti:
             print('Nessun prodotto trovato')
+            input('\nPremere INVIO per continuare...')
         else:
             print('\n{:<5} {:<20} {:<15} {:<10} {:<10} {:<20}'.format( 'ID', 'Nome', 'Categoria', 'Quantità', 'Prezzo(€)', 'Data_Inserimento' )) 
             self.stampa_separatore()
@@ -131,6 +132,7 @@ class MenuPrincipale:
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto:
             print('Prodotto non trovato')
+            input('\nPremere INVIO per continuare...')
             return
         else:
             print(f'\nProdotto selezionato: {prodotto[1]}')
@@ -148,6 +150,7 @@ class MenuPrincipale:
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto: 
             print('Prodotto non trovato')
+            input('\nPremere INVIO per continuare...')
             return 
         else: 
             print(f'\nProdotto selezionato: {prodotto[1]}')
@@ -166,6 +169,7 @@ class MenuPrincipale:
         prodotto = self.inventario.get_prodotto_per_id(prodotto_id)
         if not prodotto: 
             print('Prodotto non trovato')
+            input('\nPremere INVIO per continuare...')
             return 
         else: 
             print(f'\nProdotto selezionato: {prodotto[1]}')
@@ -183,6 +187,7 @@ class MenuPrincipale:
     def menu_ricerca_prodotto(self):
         """Cerca il prodotto"""
         self.stampa_header('RICERCA PRODOTTO')
+        print('Inserisci 0 per uscire')
         while True:
             prodotto_id = self.input_valido('ID prodotto da cercare: ', int)
             if prodotto_id == 0:
@@ -204,6 +209,7 @@ class MenuPrincipale:
         prodotti = self.inventario.visualizza_tutti_prodotti()
         if not prodotti: 
             print('prodotto non trovato')
+            input('\nPremere INVIO per continuare...')
         else: 
             totale_prodotti = len(prodotti)
             valore_totale = sum(p[3] * p[4] for p in prodotti)
@@ -232,6 +238,7 @@ class MenuPrincipale:
         movimenti = self.inventario.visualizza_tutti_movimenti()
         if not movimenti:
             print('Nessun movimento trovato')
+            input('\nPremere INVIO per continuare...')
         else:
             print("\n{:<12} {:<20} {:<12} {:<10} {:<20} {:<30}".format('Prodotto_ID', 'Nome', 'Tipo', 'Quantità', 'Data', 'Note'))
             self.stampa_separatore()
@@ -245,6 +252,7 @@ class MenuPrincipale:
         movimenti = self.inventario.visualizza_movimenti_per_prodotto(prodotto_id)
         if not movimenti:
             print('Nessun movimento trovato')
+            input('\nPremere INVIO per continuare...')
         else:
             print("\n{:<20} {:<12} {:<10} {:<20} {:<30}".format('Nome', 'Tipo', 'Quantità', 'Data', 'Note'))
             self.stampa_separatore()
